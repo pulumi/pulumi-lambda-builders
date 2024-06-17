@@ -20,7 +20,7 @@ export GOPATH := $(shell go env GOPATH)
 
 # Ensure the codegen file is present so that the hard-coded "Tar provider binaries" step doesn't fail
 codegen: .pulumi/bin/pulumi # Required by CI
-	mkdir -p bin && touch bin/pulumi-lambda-builders
+	mkdir -p bin && touch bin/pulumi-gen-lambda-builders
 
 provider: build_provider # Required by CI
 test_provider: # Required by CI
