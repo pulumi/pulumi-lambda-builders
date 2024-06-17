@@ -1,5 +1,11 @@
 {
     "name": "lambda-builders",
+    "displayName": "AWS Lambda Builders",
+    "description": "Utilities for building AWS Lambda Functions",
+    "repository": "https://github.com/pulumi/pulumi-lambda-builders",
+    "homepage": "https://pulumi.com",
+    "license": "Apache-2.0",
+    "publisher": "Pulumi",
     "resources": {},
     "language": {
         "csharp": {
@@ -19,6 +25,17 @@
             "devDependencies": {
                 "typescript": "^4.6.3"
             }
+        },
+        "java": {
+            "basePackage": "",
+            "buildFiles": "gradle",
+            "dependencies": {
+                "com.google.code.findbugs:jsr305": "3.0.2",
+                "com.google.code.gson:gson": "2.8.9",
+                "com.pulumi:pulumi": "0.9.9"
+            },
+            "gradleNexusPublishPluginVersion": "1.1.0",
+            "gradleTest": ""
         },
         "python": {
             "requires": {

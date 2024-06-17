@@ -1,2 +1,2 @@
-// Package lambdabuilders exports types, functions, subpackages for provisioning lambdabuilders resources.
+// Utilities for building AWS Lambda Functions
 package lambdabuilders

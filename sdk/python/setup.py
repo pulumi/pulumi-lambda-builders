@@ -20,8 +20,14 @@ def readme():
 setup(name='pulumi_lambda_builders',
       python_requires='>=3.8',
       version=VERSION,
+      description="Utilities for building AWS Lambda Functions",
       long_description=readme(),
       long_description_content_type='text/markdown',
+      url='https://pulumi.com',
+      project_urls={
+          'Repository': 'https://github.com/pulumi/pulumi-lambda-builders'
+      },
+      license='Apache-2.0',
       packages=find_packages(),
       package_data={
           'pulumi_lambda_builders': [

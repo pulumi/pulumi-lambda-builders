@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Pulumi Corp.</Authors>
-    <Company>Pulumi Corp.</Company>
-    <Description></Description>
-    <PackageLicenseExpression></PackageLicenseExpression>
-    <PackageProjectUrl></PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
+    <Authors>Pulumi</Authors>
+    <Company>Pulumi</Company>
+    <Description>Utilities for building AWS Lambda Functions</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://pulumi.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pulumi/pulumi-lambda-builders</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
 
     <TargetFramework>net6.0</TargetFramework>
