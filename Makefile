@@ -27,7 +27,7 @@ test_provider: # Required by CI
 generate_schema: # Required by CI
 local_generate: generate # Required by CI
 
-generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
+generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk generate_java
 
 build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
 
