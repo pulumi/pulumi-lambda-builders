@@ -16,9 +16,9 @@
 import sys
 
 import pulumi.provider
-import xyz_provider
-import xyz_provider.provider
+import lambda_builders_provider
+import lambda_builders_provider.provider
 
 
-if __name__ == '__main__':
-    pulumi.provider.main(xyz_provider.provider.Provider(), sys.argv[1:])
+if __name__ == "__main__":
+    pulumi.provider.main(lambda_builders_provider.provider.Provider(), sys.argv[1:])

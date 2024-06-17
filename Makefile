@@ -1,9 +1,12 @@
-VERSION         := 0.0.1
+PROVIDER_VERSION ?= 1.0.0-alpha.0+dev
+VERSION_GENERIC = $(shell pulumictl convert-version --language generic --version "$(PROVIDER_VERSION)")
 
-PACK            := xyz
+PACK            := lambda-builders
+PACK_           := lambda_builders
 PROJECT         := github.com/pulumi/pulumi-${PACK}
 
 PROVIDER        := pulumi-resource-${PACK}
+CODEGEN         := pulumi-gen-${PACK}
 VERSION_PATH    := provider/pkg/version.Version
 
 WORKING_DIR     := $(shell pwd)
@@ -11,16 +14,35 @@ SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
 SRC             := provider/cmd/pulumi-resource-${PACK}
 
-# The pulumi binary to use during generation
-PULUMI := .pulumi/bin/pulumi
-
+# Need to pick up locally pinned pulumi-language-* plugins
 export PULUMI_IGNORE_AMBIENT_PLUGINS = true
+export GOPATH := $(shell go env GOPATH)
+
+# Ensure the codegen file is present so that the hard-coded "Tar provider binaries" step doesn't fail
+codegen: .pulumi/bin/pulumi # Required by CI
+	mkdir -p bin && touch bin/pulumi-lambda-builders
+
+provider: build_provider # Required by CI
+test_provider: # Required by CI
+generate_schema: # Required by CI
+local_generate: generate # Required by CI
 
 generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
-gen_sdk_prerequisites: $(PULUMI)
 
 build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
+
 install:: install_dotnet_sdk install_nodejs_sdk
+
+ensure:: tidy
+
+tidy: tidy_provider tidy_examples
+	cd sdk && go mod tidy
+
+tidy_examples:
+	cd examples && go mod tidy
+
+tidy_provider:
+	cd provider && go mod tidy
 
 
 # Provider
@@ -28,17 +50,17 @@ install:: install_dotnet_sdk install_nodejs_sdk
 PROVIDER_FILES =  bin/PulumiPlugin.yaml bin/requirements.txt bin/run-provider.py
 PROVIDER_FILES += bin/pulumi-resource-${PACK}.cmd bin/pulumi-resource-${PACK}
 
-build_provider::	bin/venv bin/${PACK}_provider ${PROVIDER_FILES}
+build_provider::	bin/venv bin/${PACK}-provider ${PROVIDER_FILES}
 
 bin/venv:		${SRC}/requirements.txt
 	rm -rf $@
 	python3 -m venv $@
 	./bin/venv/bin/python -m pip install -r $<
 
-bin/${PACK}_provider:	${SRC}/	${SRC}/${PACK}_provider/VERSION
+bin/${PACK}-provider:	${SRC}/	${SRC}/${PACK_}_provider/VERSION
 	rm -rf $@
-	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK}_provider/schema.json
-	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/
+	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK_}_provider/schema.json
+	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/ --upgrade
 
 bin/PulumiPlugin.yaml:			${SRC}/PulumiPlugin.yaml
 bin/requirements.txt:			${SRC}/requirements.txt
@@ -49,79 +71,93 @@ bin/run-provider.py:			${SRC}/run-provider.py
 bin/%:
 	cp -f $< $@
 
-${SRC}/${PACK}_provider/VERSION:
-	echo "${VERSION}" > ${SRC}/${PACK}_provider/VERSION
+${SRC}/${PACK_}_provider/VERSION:
+	echo "${VERSION_GENERIC}" > ${SRC}/${PACK_}_provider/VERSION
 
 # Go SDK
 
-gen_go_sdk: gen_sdk_prerequisites
+gen_go_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/go
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language go
+	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language go --version ${VERSION_GENERIC}
+build_go_sdk::
+generate_go: gen_go_sdk # Required by CI
+build_go: # Required by CI
+install_go_sdk:: # Required by CI
 
 
 # .NET SDK
 
-gen_dotnet_sdk: DOTNET_VERSION := $(shell pulumictl get version --language dotnet)
-gen_dotnet_sdk: gen_sdk_prerequisites
+gen_dotnet_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/dotnet
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language dotnet
+	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language dotnet --version ${VERSION_GENERIC}
 
 build_dotnet_sdk:: DOTNET_VERSION := ${VERSION}
 build_dotnet_sdk:: gen_dotnet_sdk
 	cd sdk/dotnet/ && \
 		echo "${DOTNET_VERSION}" >version.txt && \
-		dotnet build /p:Version=${DOTNET_VERSION}
+		dotnet build
 
-install_dotnet_sdk:: build_dotnet_sdk
+install_dotnet_sdk::
 	rm -rf ${WORKING_DIR}/nuget
 	mkdir -p ${WORKING_DIR}/nuget
 	find . -name '*.nupkg' -print -exec cp -p {} ${WORKING_DIR}/nuget \;
 
+generate_dotnet: gen_dotnet_sdk # Required by CI
+build_dotnet: build_dotnet_sdk # Required by CI
+
 
 # Node.js SDK
 
-gen_nodejs_sdk: VERSION := $(shell pulumictl get version --language javascript)
-gen_nodejs_sdk: gen_sdk_prerequisites
+gen_nodejs_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/nodejs
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language nodejs
+	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language nodejs --version ${VERSION_GENERIC}
 
 build_nodejs_sdk:: gen_nodejs_sdk
 	cd sdk/nodejs/ && \
 		yarn install && \
 		yarn run tsc --version && \
 		yarn run tsc && \
-		cp ../../README.md ../../LICENSE package.json yarn.lock ./bin/ && \
-		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
-		rm ./bin/package.json.bak
+		cp ../../README.md ../../LICENSE package.json yarn.lock ./bin/
 
+generate_nodejs: gen_nodejs_sdk # Required by CI
+build_nodejs: build_nodejs_sdk # Required by CI
 install_nodejs_sdk:: build_nodejs_sdk
+	yarn unlink ${PACK} || true
 	yarn link --cwd ${WORKING_DIR}/sdk/nodejs/bin
 
 
 # Python SDK
 
-gen_python_sdk: PYPI_VERSION := $(shell pulumictl get version --language python)
-gen_python_sdk: gen_sdk_prerequisites
+gen_python_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/python
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language python
+	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language python --version ${VERSION_GENERIC}
 	cp ${WORKING_DIR}/README.md sdk/python
-	cp ${WORKING_DIR}/misc/pyproject.toml sdk/python
 
-build_python_sdk:: PYPI_VERSION := $(shell pulumictl get version --language python)
+build_python_sdk:: PYPI_VERSION := ${VERSION}
 build_python_sdk:: gen_python_sdk
 	cd sdk/python/ && \
-		printf "module fake_python_module // Exclude this directory from Go tools\n\ngo 1.17\n" > go.mod && \
 		rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
-		sed -i.bak -e 's/^  version = .*/  version = "$(PYPI_VERSION)"/g' ./bin/pyproject.toml && \
-		rm ./bin/pyproject.toml.bak && rm ./bin/go.mod && \
 		python3 -m venv venv && \
 		./venv/bin/python -m pip install build && \
-		cd ./bin && \
-		../venv/bin/python -m build .
+		cd ./bin && ../venv/bin/python -m build .
+
+generate_python: gen_python_sdk # Required by CI
+build_python: build_python_sdk # Required by CI
+install_python_sdk:: # Required by CI
+
+# Java SDK
+
+generate_java: # Required by CI
+	pulumi package gen-sdk ${SCHEMA_PATH} -o sdk --language java
+	cp ${WORKING_DIR}/README.md sdk/java
+build_java: # Required by CI
+	cd sdk/java && gradle --console=plain build
+
+install_java_sdk: # Required by CI
 
 # Output tarballs for plugin distribution. Example use:
 #
-# pulumi plugin install resource xyz 0.0.1 --file pulumi-resource-xyz-v0.0.1-linux-amd64.tar.gz
+# pulumi plugin install resource lambda-builders 0.0.1 --file pulumi-resource-lambda-builders-v0.0.1-linux-amd64.tar.gz
 
 dist::	build_provider
 	rm -rf dist
@@ -131,20 +167,8 @@ dist::	build_provider
 	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-arm64.tar.gz
 	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-windows-amd64.tar.gz .)
 
-
-# Keep the version of the pulumi binary used for code generation in sync with the version
-# of the dependency used by this provider.
-
-$(PULUMI): HOME := $(WORKING_DIR)
-$(PULUMI): provider/go.mod
-	@ PULUMI_VERSION="$$(cd provider && go list -m github.com/pulumi/pulumi/pkg/v3 | awk '{print $$2}')"; \
-	if [ -x $(PULUMI) ]; then \
-		CURRENT_VERSION="$$($(PULUMI) version)"; \
-		if [ "$${CURRENT_VERSION}" != "$${PULUMI_VERSION}" ]; then \
-			echo "Upgrading $(PULUMI) from $${CURRENT_VERSION} to $${PULUMI_VERSION}"; \
-			rm $(PULUMI); \
-		fi; \
-	fi; \
-	if ! [ -x $(PULUMI) ]; then \
-		curl -fsSL https://get.pulumi.com | sh -s -- --version "$${PULUMI_VERSION#v}"; \
-	fi
+# Pulumi for codegen
+.pulumi/bin/pulumi: PULUMI_VERSION := $(shell cat .pulumi.version)
+.pulumi/bin/pulumi: HOME := $(WORKING_DIR)
+.pulumi/bin/pulumi: .pulumi.version
+	curl -fsSL https://get.pulumi.com | sh -s -- -version "$(PULUMI_VERSION)"
