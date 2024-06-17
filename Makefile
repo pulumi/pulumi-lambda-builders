@@ -13,11 +13,27 @@ SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
 SRC             := provider/cmd/pulumi-resource-${PACK}
 
+PULUMI := .pulumi/bin/pulumi
+
+# Need to pick up locally pinned pulumi-language-* plugins
+export PULUMI_IGNORE_AMBIENT_PLUGINS = true
+export GOPATH := $(shell go env GOPATH)
+
+ensure:: tidy
+
+tidy: tidy_provider tidy_examples
+	cd sdk && go mod tidy
+
+tidy_examples:
+	cd examples && go mod tidy
+
+tidy_provider:
+	cd provider && go mod tidy
+
 generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
 
 build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
 install:: install_dotnet_sdk install_nodejs_sdk
-export GOPATH := $(shell go env GOPATH)
 
 # Provider
 
@@ -121,3 +137,20 @@ dist::	build_provider
 	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-amd64.tar.gz
 	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-arm64.tar.gz
 	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-windows-amd64.tar.gz .)
+
+# Keep the version of the pulumi binary used for code generation in sync with the version
+# of the dependency used by github.com/pulumi/pulumi-command/provider
+
+$(PULUMI): HOME := $(WORKING_DIR)
+$(PULUMI): provider/go.mod
+	@ PULUMI_VERSION="$$(cd provider && go list -m github.com/pulumi/pulumi/pkg/v3 | awk '{print $$2}')"; \
+	if [ -x $(PULUMI) ]; then \
+		CURRENT_VERSION="$$($(PULUMI) version)"; \
+		if [ "$${CURRENT_VERSION}" != "$${PULUMI_VERSION}" ]; then \
+			echo "Upgrading $(PULUMI) from $${CURRENT_VERSION} to $${PULUMI_VERSION}"; \
+			rm $(PULUMI); \
+		fi; \
+	fi; \
+	if ! [ -x $(PULUMI) ]; then \
+		curl -fsSL https://get.pulumi.com | sh -s -- --version "$${PULUMI_VERSION#v}"; \
+	fi
