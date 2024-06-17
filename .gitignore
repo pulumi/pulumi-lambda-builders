@@ -20,3 +20,5 @@ ci-scripts/
 # This is an artifact only so that we can pass the
 # schema for the provider GetSchema gRPC request
 /provider/cmd/pulumi-resource-*/*/schema.json
+/provider/cmd/pulumi-resource-*/build/
+
