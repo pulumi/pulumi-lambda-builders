@@ -22,3 +22,8 @@ ci-scripts/
 /provider/cmd/pulumi-resource-*/*/schema.json
 /provider/cmd/pulumi-resource-*/build/
 
+sdk/dotnet/version.txt
+sdk/java/.gradle
+sdk/java/build/
+sdk/java/build.gradle
+sdk/python/venv
