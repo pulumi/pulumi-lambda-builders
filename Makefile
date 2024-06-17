@@ -59,7 +59,6 @@ bin/venv:		${SRC}/requirements.txt
 
 bin/${PACK}-provider:	${SRC}/	${SRC}/${PACK_}_provider/VERSION
 	rm -rf $@
-	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK_}_provider/schema.json
 	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/ --upgrade
 
 bin/PulumiPlugin.yaml:			${SRC}/PulumiPlugin.yaml
