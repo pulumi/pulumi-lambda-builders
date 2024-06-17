@@ -1,8 +1,2 @@
-import * as xyz from "@pulumi/xyz";
+import * as builders from "@pulumi/lambda-builders";
 
-const page = new xyz.StaticPage("page", {
-    indexContent: "<html><body><p>Hello world!</p></body></html>",
-});
-
-export const bucket = page.bucket;
-export const url = page.websiteUrl;

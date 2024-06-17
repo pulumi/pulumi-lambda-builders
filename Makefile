@@ -1,9 +1,11 @@
 VERSION         := 0.0.1
 
-PACK            := xyz
+PACK            := lambda-builders
+PACK_           := lambda_builders
 PROJECT         := github.com/pulumi/pulumi-${PACK}
 
 PROVIDER        := pulumi-resource-${PACK}
+CODEGEN         := pulumi-gen-${PACK}
 VERSION_PATH    := provider/pkg/version.Version
 
 WORKING_DIR     := $(shell pwd)
@@ -11,17 +13,11 @@ SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
 SRC             := provider/cmd/pulumi-resource-${PACK}
 
-# The pulumi binary to use during generation
-PULUMI := .pulumi/bin/pulumi
-
-export PULUMI_IGNORE_AMBIENT_PLUGINS = true
-
 generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
-gen_sdk_prerequisites: $(PULUMI)
 
 build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
 install:: install_dotnet_sdk install_nodejs_sdk
-
+export GOPATH := $(shell go env GOPATH)
 
 # Provider
 
@@ -35,10 +31,10 @@ bin/venv:		${SRC}/requirements.txt
 	python3 -m venv $@
 	./bin/venv/bin/python -m pip install -r $<
 
-bin/${PACK}_provider:	${SRC}/	${SRC}/${PACK}_provider/VERSION
+bin/${PACK}_provider:	${SRC}/	${SRC}/${PACK_}_provider/VERSION
 	rm -rf $@
-	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK}_provider/schema.json
-	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/
+	cp ${WORKING_DIR}/schema.json ${SRC}/${PACK_}_provider/schema.json
+	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/ --upgrade
 
 bin/PulumiPlugin.yaml:			${SRC}/PulumiPlugin.yaml
 bin/requirements.txt:			${SRC}/requirements.txt
@@ -49,22 +45,21 @@ bin/run-provider.py:			${SRC}/run-provider.py
 bin/%:
 	cp -f $< $@
 
-${SRC}/${PACK}_provider/VERSION:
-	echo "${VERSION}" > ${SRC}/${PACK}_provider/VERSION
+${SRC}/${PACK_}_provider/VERSION:
+	echo "${VERSION}" > ${SRC}/${PACK_}_provider/VERSION
 
 # Go SDK
 
-gen_go_sdk: gen_sdk_prerequisites
+gen_go_sdk::
 	rm -rf sdk/go
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language go
+	cd provider/cmd/${CODEGEN} && go run . go ../../../sdk/go ${SCHEMA_PATH}
 
 
 # .NET SDK
 
-gen_dotnet_sdk: DOTNET_VERSION := $(shell pulumictl get version --language dotnet)
-gen_dotnet_sdk: gen_sdk_prerequisites
+gen_dotnet_sdk::
 	rm -rf sdk/dotnet
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language dotnet
+	cd provider/cmd/${CODEGEN} && go run . dotnet ../../../sdk/dotnet ${SCHEMA_PATH}
 
 build_dotnet_sdk:: DOTNET_VERSION := ${VERSION}
 build_dotnet_sdk:: gen_dotnet_sdk
@@ -80,16 +75,16 @@ install_dotnet_sdk:: build_dotnet_sdk
 
 # Node.js SDK
 
-gen_nodejs_sdk: VERSION := $(shell pulumictl get version --language javascript)
-gen_nodejs_sdk: gen_sdk_prerequisites
+gen_nodejs_sdk::
 	rm -rf sdk/nodejs
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language nodejs
+	cd provider/cmd/${CODEGEN} && go run . nodejs ../../../sdk/nodejs ${SCHEMA_PATH}
 
 build_nodejs_sdk:: gen_nodejs_sdk
 	cd sdk/nodejs/ && \
 		yarn install && \
 		yarn run tsc --version && \
 		yarn run tsc && \
+		cp -R scripts/ bin && \
 		cp ../../README.md ../../LICENSE package.json yarn.lock ./bin/ && \
 		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
 		rm ./bin/package.json.bak
@@ -100,28 +95,24 @@ install_nodejs_sdk:: build_nodejs_sdk
 
 # Python SDK
 
-gen_python_sdk: PYPI_VERSION := $(shell pulumictl get version --language python)
-gen_python_sdk: gen_sdk_prerequisites
+gen_python_sdk::
 	rm -rf sdk/python
-	$(PULUMI) package gen-sdk ${SCHEMA_PATH} --language python
+	cd provider/cmd/${CODEGEN} && go run . python ../../../sdk/python ${SCHEMA_PATH}
 	cp ${WORKING_DIR}/README.md sdk/python
-	cp ${WORKING_DIR}/misc/pyproject.toml sdk/python
 
-build_python_sdk:: PYPI_VERSION := $(shell pulumictl get version --language python)
+build_python_sdk:: PYPI_VERSION := ${VERSION}
 build_python_sdk:: gen_python_sdk
 	cd sdk/python/ && \
-		printf "module fake_python_module // Exclude this directory from Go tools\n\ngo 1.17\n" > go.mod && \
+		python3 setup.py clean --all 2>/dev/null && \
 		rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
-		sed -i.bak -e 's/^  version = .*/  version = "$(PYPI_VERSION)"/g' ./bin/pyproject.toml && \
-		rm ./bin/pyproject.toml.bak && rm ./bin/go.mod && \
-		python3 -m venv venv && \
-		./venv/bin/python -m pip install build && \
-		cd ./bin && \
-		../venv/bin/python -m build .
+		sed -i.bak -e "s/\$${VERSION}/${PYPI_VERSION}/g" -e "s/\$${PLUGIN_VERSION}/${VERSION}/g" ./bin/setup.py && \
+		rm ./bin/setup.py.bak && \
+		cd ./bin && python3 setup.py build sdist
+
 
 # Output tarballs for plugin distribution. Example use:
 #
-# pulumi plugin install resource xyz 0.0.1 --file pulumi-resource-xyz-v0.0.1-linux-amd64.tar.gz
+# pulumi plugin install resource lambda-builders 0.0.1 --file pulumi-resource-lambda-builders-v0.0.1-linux-amd64.tar.gz
 
 dist::	build_provider
 	rm -rf dist
@@ -130,21 +121,3 @@ dist::	build_provider
 	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-amd64.tar.gz
 	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-arm64.tar.gz
 	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-windows-amd64.tar.gz .)
-
-
-# Keep the version of the pulumi binary used for code generation in sync with the version
-# of the dependency used by this provider.
-
-$(PULUMI): HOME := $(WORKING_DIR)
-$(PULUMI): provider/go.mod
-	@ PULUMI_VERSION="$$(cd provider && go list -m github.com/pulumi/pulumi/pkg/v3 | awk '{print $$2}')"; \
-	if [ -x $(PULUMI) ]; then \
-		CURRENT_VERSION="$$($(PULUMI) version)"; \
-		if [ "$${CURRENT_VERSION}" != "$${PULUMI_VERSION}" ]; then \
-			echo "Upgrading $(PULUMI) from $${CURRENT_VERSION} to $${PULUMI_VERSION}"; \
-			rm $(PULUMI); \
-		fi; \
-	fi; \
-	if ! [ -x $(PULUMI) ]; then \
-		curl -fsSL https://get.pulumi.com | sh -s -- --version "$${PULUMI_VERSION#v}"; \
-	fi
