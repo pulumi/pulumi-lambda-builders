@@ -57,6 +57,7 @@ func main() {
 			return err
 		}
 
+		// invoke the function to ensure that bundling worked correctly
 		res, err := lambda.NewInvocation(ctx, "invoke-function", &lambda.InvocationArgs{
 			FunctionName: f.Name,
 			Input:        pulumi.String(""),

@@ -18,6 +18,7 @@ from pulumi.provider.provider import InvokeResult
 import pulumi.provider as provider
 
 import lambda_builders_provider
+from lambda_builders_provider.build_go import BuildGoArgs, build_go
 
 
 class Provider(provider.Provider):
