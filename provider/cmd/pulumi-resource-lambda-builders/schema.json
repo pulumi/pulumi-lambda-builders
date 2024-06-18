@@ -7,6 +7,37 @@
     "license": "Apache-2.0",
     "publisher": "Pulumi",
     "resources": {},
+    "functions": {
+        "lambda-builders:index:buildGo": {
+            "inputs": {
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "architecture": {
+                        "type": "string",
+                        "enum": [
+                            {
+                                "name": "ARM_64",
+                                "value": "arm64"
+                            },
+                            {
+                                "name": "X86_64",
+                                "value": "x86_64"
+                            }
+                        ]
+                    }
+                }
+            },
+            "outputs": {
+                "properties": {
+                    "asset": {
+                        "$ref": "pulumi.json#/Archive"
+                    }
+                }
+            }
+        }
+    },
     "language": {
         "csharp": {
             "packageReferences": {

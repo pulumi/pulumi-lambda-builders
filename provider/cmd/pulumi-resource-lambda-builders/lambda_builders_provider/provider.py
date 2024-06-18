@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
+from typing import Mapping, Any
 
-from pulumi import Inputs, ResourceOptions
-from pulumi.provider import ConstructResult
+from pulumi.provider.provider import InvokeResult
 import pulumi.provider as provider
 
 import lambda_builders_provider
@@ -28,12 +27,8 @@ class Provider(provider.Provider):
             lambda_builders_provider.__version__, lambda_builders_provider.__schema__
         )
 
-    def construct(
-        self,
-        name: str,
-        resource_type: str,
-        inputs: Inputs,
-        options: Optional[ResourceOptions] = None,
-    ) -> ConstructResult:
+    def invoke(self, token: str, args: Mapping[str, Any]) -> InvokeResult:
+        if token == "lambda-builders:index:buildGo":
+            return build_go(BuildGoArgs.from_inputs(args))
 
-        raise Exception(f"Unknown resource type {resource_type}")
+        raise Exception(f"Unknown function {token}")

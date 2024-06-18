@@ -21,5 +21,6 @@ setup(
     install_requires=[
         "pulumi>=3.0.0",
         "pulumi_aws>=6.0.0",
+        "aws_lambda_builders==1.49.0",
     ],
 )

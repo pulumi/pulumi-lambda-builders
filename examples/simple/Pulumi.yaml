@@ -1,9 +1,3 @@
 name: simple
 runtime: nodejs
-description: A simple lambda-builders example
-
-# While developing, instruct pulumi to find the xyz binary at this location.
-plugins:
-  providers:
-    - name: lambda-builders
-      path: ../../bin
+description: A simple xyz example
