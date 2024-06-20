@@ -113,14 +113,12 @@ jobs:
           sdk/python/pyproject.toml
     - run: git status --porcelain
     - name: Tar provider binaries
-      run: tar -zcf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
-        github.workspace}}/bin/ pulumi-resource-${{ env.PROVIDER }}
-        pulumi-gen-${{ env.PROVIDER}}
+      run: tar -zcf ${{ github.workspace }}/provider.tar.gz -C ${{ github.workspace }}/bin/ .
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin/provider.tar.gz
+        path: ${{ github.workspace }}/provider.tar.gz
     - name: Test Provider Library
       run: make test_provider
     - name: Upload coverage reports to Codecov
@@ -195,13 +193,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}
     - name: UnTar provider binaries
-      run: tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
+      run: mkdir -p ${{ github.workspace}}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{
         github.workspace}}/bin
     - name: Restore Binary Permissions
-      run: find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print
-        -exec chmod +x {} \;
+      run: chmod +x bin/*
     - name: Generate SDK
       run: make generate_${{ matrix.language }}
     - name: Build SDK
@@ -296,13 +293,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}
     - name: UnTar provider binaries
-      run: tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
+      run: mkdir -p ${{ github.workspace}}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{
         github.workspace}}/bin
     - name: Restore Binary Permissions
-      run: find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print
-        -exec chmod +x {} \;
+      run: chmod +x bin/*
     - name: Download SDK
       uses: actions/download-artifact@v4
       with:
@@ -358,15 +354,6 @@ jobs:
       with:
         go-version: ${{ env.GOVERSION }}
         cache-dependency-path: "**/*.sum"
-    - name: Clear GitHub Actions Ubuntu runner disk space
-      uses: jlumbroso/free-disk-space@v1.3.1
-      with:
-        tool-cache: false
-        dotnet: false
-        android: true
-        haskell: true
-        swap-storage: true
-        large-packages: false
     - name: Install pulumictl
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
@@ -383,14 +370,23 @@ jobs:
         role-session-name: ${{ env.PROVIDER }}@githubActions
         role-external-id: upload-pulumi-release
         role-to-assume: ${{ secrets.AWS_UPLOAD_ROLE_ARN }}
-    # TODO: publishing
-    # - name: Run GoReleaser
-    #   uses: goreleaser/goreleaser-action@v5
-    #   env:
-    #     GORELEASER_CURRENT_TAG: v${{ steps.version.outputs.version }}
-    #   with:
-    #     args: -p 3 -f .goreleaser.prerelease.yml --clean --skip=validate --timeout 60m0s
-    #     version: latest
+    - name: Download provider binary
+      uses: actions/download-artifact@v3
+      with:
+        name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
+        path: ${{ github.workspace }}
+    - name: Untar provider binaries
+      run: mkdir -p ${{ github.workspace }}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{ github.workspace
+        }}/bin
+    - name: Restore binary perms
+      run: find ${{ github.workspace }}/bin -name "pulumi-*-${{ env.PROVIDER }}" -print
+        -exec chmod +x {} \;
+    - name: Test provider
+      run: make test_provider
+    - name: Create Provider Binaries
+      run: make dist
+    - name: Upload Provider Binaries
+      run: aws s3 cp dist s3://get.pulumi.com/releases/plugins/ --recursive
     - if: failure() && github.event_name == 'push'
       name: Notify Slack
       uses: 8398a7/action-slack@v3
