@@ -320,7 +320,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}
     - name: UnTar provider binaries
       run: mkdir -p ${{ github.workspace}}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{
         github.workspace}}/bin
