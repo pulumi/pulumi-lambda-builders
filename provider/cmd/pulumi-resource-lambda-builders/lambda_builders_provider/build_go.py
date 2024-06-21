@@ -66,7 +66,6 @@ def build_go(args: BuildGoArgs) -> InvokeResult:
     if args.architecture != None:
         arch = args.architecture
 
-    print(args.code, file=sys.stderr)
     builder.build(
         source_dir=args.code,
         artifacts_dir=tmp_dir,

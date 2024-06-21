@@ -51,7 +51,7 @@ func main() {
 			Code:          build.Asset,
 			Handler:       pulumi.String("bootstrap"),
 			Role:          role.Arn,
-			Runtime:       pulumi.String("provided.al2023"),
+			Runtime:       pulumi.String(lambda.RuntimeCustomAL2023),
 		})
 		if err != nil {
 			return err
