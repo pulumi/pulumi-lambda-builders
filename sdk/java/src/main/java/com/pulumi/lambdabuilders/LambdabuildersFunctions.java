@@ -14,21 +14,459 @@ import com.pulumi.lambdabuilders.outputs.BuildGoResult;
 import java.util.concurrent.CompletableFuture;
 
 public final class LambdabuildersFunctions {
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static Output<BuildGoResult> buildGo() {
         return buildGo(BuildGoArgs.Empty, InvokeOptions.Empty);
     }
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static CompletableFuture<BuildGoResult> buildGoPlain() {
         return buildGoPlain(BuildGoPlainArgs.Empty, InvokeOptions.Empty);
     }
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static Output<BuildGoResult> buildGo(BuildGoArgs args) {
         return buildGo(args, InvokeOptions.Empty);
     }
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static CompletableFuture<BuildGoResult> buildGoPlain(BuildGoPlainArgs args) {
         return buildGoPlain(args, InvokeOptions.Empty);
     }
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static Output<BuildGoResult> buildGo(BuildGoArgs args, InvokeOptions options) {
         return Deployment.getInstance().invoke("lambda-builders:index:buildGo", TypeShape.of(BuildGoResult.class), args, Utilities.withVersion(options));
     }
+    /**
+     * Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+     * 
+     * The below example uses a folder structure like this:
+     * 
+     * The output of `buildGo` produces an asset that can be passed to the
+     * `aws.Lambda` `Code` property.
+     * 
+     * ## Example Usage
+     * 
+     * Basic usage:
+     * 
+     * <pre>
+     * {@code
+     * package generated_program;
+     * 
+     * import com.pulumi.Context;
+     * import com.pulumi.Pulumi;
+     * import com.pulumi.core.Output;
+     * import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+     * import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+     * import com.pulumi.aws.iam.IamFunctions;
+     * import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+     * import com.pulumi.aws.iam.Role;
+     * import com.pulumi.aws.iam.RoleArgs;
+     * import com.pulumi.aws.lambda.Function;
+     * import com.pulumi.aws.lambda.FunctionArgs;
+     * import java.util.List;
+     * import java.util.ArrayList;
+     * import java.util.Map;
+     * import java.io.File;
+     * import java.nio.file.Files;
+     * import java.nio.file.Paths;
+     * 
+     * public class App {
+     *     public static void main(String[] args) {
+     *         Pulumi.run(App::stack);
+     *     }
+     * 
+     *     public static void stack(Context ctx) {
+     *         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+     *             .architecture("arm64")
+     *             .code("cmd/simple")
+     *             .build());
+     * 
+     *         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+     *             .statements(GetPolicyDocumentStatementArgs.builder()
+     *                 .actions("sts:AssumeRole")
+     *                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+     *                     .type("Service")
+     *                     .identifiers("lambda.amazonaws.com")
+     *                     .build())
+     *                 .build())
+     *             .build());
+     * 
+     *         var role = new Role("role", RoleArgs.builder()
+     *             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -> getPolicyDocumentResult.json()))
+     *             .build());
+     * 
+     *         var function = new Function("function", FunctionArgs.builder()
+     *             .code(buildGoResult.asset())
+     *             .architectures("arm64")
+     *             .handler("bootstrap")
+     *             .role(role.arn())
+     *             .runtime("provided.al2023")
+     *             .build());
+     * 
+     *     }
+     * }
+     * }
+     * </pre>
+     * 
+     */
     public static CompletableFuture<BuildGoResult> buildGoPlain(BuildGoPlainArgs args, InvokeOptions options) {
         return Deployment.getInstance().invokeAsync("lambda-builders:index:buildGo", TypeShape.of(BuildGoResult.class), args, Utilities.withVersion(options));
     }

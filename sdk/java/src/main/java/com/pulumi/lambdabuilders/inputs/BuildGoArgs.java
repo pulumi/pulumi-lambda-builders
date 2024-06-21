@@ -15,16 +15,32 @@ public final class BuildGoArgs extends com.pulumi.resources.InvokeArgs {
 
     public static final BuildGoArgs Empty = new BuildGoArgs();
 
+    /**
+     * Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+     * 
+     */
     @Import(name="architecture")
     private @Nullable Output<String> architecture;
 
+    /**
+     * @return Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+     * 
+     */
     public Optional<Output<String>> architecture() {
         return Optional.ofNullable(this.architecture);
     }
 
+    /**
+     * The path to the go code to build
+     * 
+     */
     @Import(name="code")
     private @Nullable Output<String> code;
 
+    /**
+     * @return The path to the go code to build
+     * 
+     */
     public Optional<Output<String>> code() {
         return Optional.ofNullable(this.code);
     }
@@ -54,20 +70,44 @@ public final class BuildGoArgs extends com.pulumi.resources.InvokeArgs {
             $ = new BuildGoArgs(Objects.requireNonNull(defaults));
         }
 
+        /**
+         * @param architecture Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+         * 
+         * @return builder
+         * 
+         */
         public Builder architecture(@Nullable Output<String> architecture) {
             $.architecture = architecture;
             return this;
         }
 
+        /**
+         * @param architecture Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+         * 
+         * @return builder
+         * 
+         */
         public Builder architecture(String architecture) {
             return architecture(Output.of(architecture));
         }
 
+        /**
+         * @param code The path to the go code to build
+         * 
+         * @return builder
+         * 
+         */
         public Builder code(@Nullable Output<String> code) {
             $.code = code;
             return this;
         }
 
+        /**
+         * @param code The path to the go code to build
+         * 
+         * @return builder
+         * 
+         */
         public Builder code(String code) {
             return code(Output.of(code));
         }

@@ -11,9 +11,17 @@ import javax.annotation.Nullable;
 
 @CustomType
 public final class BuildGoResult {
+    /**
+     * @return The archive that contains the golang binary that will be deployed to the Lambda Function.
+     * 
+     */
     private @Nullable Archive asset;
 
     private BuildGoResult() {}
+    /**
+     * @return The archive that contains the golang binary that will be deployed to the Lambda Function.
+     * 
+     */
     public Optional<Archive> asset() {
         return Optional.ofNullable(this.asset);
     }

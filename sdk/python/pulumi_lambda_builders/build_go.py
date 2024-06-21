@@ -26,6 +26,9 @@ class BuildGoResult:
     @property
     @pulumi.getter
     def asset(self) -> Optional[pulumi.Archive]:
+        """
+        The archive that contains the golang binary that will be deployed to the Lambda Function.
+        """
         return pulumi.get(self, "asset")
 
 
@@ -42,7 +45,43 @@ def build_go(architecture: Optional[str] = None,
              code: Optional[str] = None,
              opts: Optional[pulumi.InvokeOptions] = None) -> AwaitableBuildGoResult:
     """
-    Use this data source to access information about an existing resource.
+    Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+
+    The below example uses a folder structure like this:
+
+    The output of `buildGo` produces an asset that can be passed to the
+    `aws.Lambda` `Code` property.
+
+    ## Example Usage
+
+    Basic usage:
+
+    ```python
+    import pulumi
+    import pulumi_aws as aws
+    import pulumi_lambda_builders as lambda_builders
+
+    builder = lambda_builders.build_go(architecture="arm64",
+        code="cmd/simple")
+    lambda_role_policy = aws.iam.get_policy_document_output(statements=[aws.iam.GetPolicyDocumentStatementArgs(
+        actions=["sts:AssumeRole"],
+        principals=[aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+            type="Service",
+            identifiers=["lambda.amazonaws.com"],
+        )],
+    )])
+    role = aws.iam.Role("role", assume_role_policy=lambda_role_policy.json)
+    function = aws.lambda_.Function("function",
+        code=builder.asset,
+        architectures=["arm64"],
+        handler="bootstrap",
+        role=role.arn,
+        runtime=aws.lambda_.Runtime.CUSTOM_AL2023)
+    ```
+
+
+    :param str architecture: Lambda function architecture to build for. Valid values are `"x86_64"` and `"arm64"`. Default is `"x86_64"`.
+    :param str code: The path to the go code to build
     """
     __args__ = dict()
     __args__['architecture'] = architecture
@@ -59,6 +98,42 @@ def build_go_output(architecture: Optional[pulumi.Input[Optional[str]]] = None,
                     code: Optional[pulumi.Input[Optional[str]]] = None,
                     opts: Optional[pulumi.InvokeOptions] = None) -> pulumi.Output[BuildGoResult]:
     """
-    Use this data source to access information about an existing resource.
+    Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+
+    The below example uses a folder structure like this:
+
+    The output of `buildGo` produces an asset that can be passed to the
+    `aws.Lambda` `Code` property.
+
+    ## Example Usage
+
+    Basic usage:
+
+    ```python
+    import pulumi
+    import pulumi_aws as aws
+    import pulumi_lambda_builders as lambda_builders
+
+    builder = lambda_builders.build_go(architecture="arm64",
+        code="cmd/simple")
+    lambda_role_policy = aws.iam.get_policy_document_output(statements=[aws.iam.GetPolicyDocumentStatementArgs(
+        actions=["sts:AssumeRole"],
+        principals=[aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+            type="Service",
+            identifiers=["lambda.amazonaws.com"],
+        )],
+    )])
+    role = aws.iam.Role("role", assume_role_policy=lambda_role_policy.json)
+    function = aws.lambda_.Function("function",
+        code=builder.asset,
+        architectures=["arm64"],
+        handler="bootstrap",
+        role=role.arn,
+        runtime=aws.lambda_.Runtime.CUSTOM_AL2023)
+    ```
+
+
+    :param str architecture: Lambda function architecture to build for. Valid values are `"x86_64"` and `"arm64"`. Default is `"x86_64"`.
+    :param str code: The path to the go code to build
     """
     ...

@@ -14,16 +14,32 @@ public final class BuildGoPlainArgs extends com.pulumi.resources.InvokeArgs {
 
     public static final BuildGoPlainArgs Empty = new BuildGoPlainArgs();
 
+    /**
+     * Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+     * 
+     */
     @Import(name="architecture")
     private @Nullable String architecture;
 
+    /**
+     * @return Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+     * 
+     */
     public Optional<String> architecture() {
         return Optional.ofNullable(this.architecture);
     }
 
+    /**
+     * The path to the go code to build
+     * 
+     */
     @Import(name="code")
     private @Nullable String code;
 
+    /**
+     * @return The path to the go code to build
+     * 
+     */
     public Optional<String> code() {
         return Optional.ofNullable(this.code);
     }
@@ -53,11 +69,23 @@ public final class BuildGoPlainArgs extends com.pulumi.resources.InvokeArgs {
             $ = new BuildGoPlainArgs(Objects.requireNonNull(defaults));
         }
 
+        /**
+         * @param architecture Lambda function architecture to build for. Valid values are `&#34;x86_64&#34;` and `&#34;arm64&#34;`. Default is `&#34;x86_64&#34;`.
+         * 
+         * @return builder
+         * 
+         */
         public Builder architecture(@Nullable String architecture) {
             $.architecture = architecture;
             return this;
         }
 
+        /**
+         * @param code The path to the go code to build
+         * 
+         * @return builder
+         * 
+         */
         public Builder code(@Nullable String code) {
             $.code = code;
             return this;

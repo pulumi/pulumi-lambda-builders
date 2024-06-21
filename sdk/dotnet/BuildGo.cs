@@ -11,9 +11,601 @@ namespace Pulumi.LambdaBuilders
 {
     public static class BuildGo
     {
+        /// <summary>
+        /// Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+        /// 
+        /// The below example uses a folder structure like this:
+        /// ```tree
+        /// examples/simple-go
+        /// ├── Pulumi.yaml
+        /// ├── cmd
+        /// │   └── simple
+        /// │       └── main.go
+        /// ├── go.mod
+        /// ├── go.sum
+        /// └── main.go
+        /// ```
+        /// 
+        /// The output of `buildGo` produces an asset that can be passed to the
+        /// `aws.Lambda` `Code` property.
+        /// 
+        /// {{% examples %}}
+        /// 
+        /// ## Example Usage
+        /// 
+        /// {{% example %}}
+        /// 
+        /// Basic usage:
+        /// 
+        /// ```typescript
+        /// import * as pulumi from "@pulumi/pulumi";
+        /// import * as aws from "@pulumi/aws";
+        /// import * as lambda_builders from "@pulumi/lambda-builders";
+        /// 
+        /// const builder = lambda_builders.buildGo({
+        ///     architecture: "arm64",
+        ///     code: "cmd/simple",
+        /// });
+        /// const lambdaRolePolicy = aws.iam.getPolicyDocumentOutput({
+        ///     statements: [{
+        ///         actions: ["sts:AssumeRole"],
+        ///         principals: [{
+        ///             type: "Service",
+        ///             identifiers: ["lambda.amazonaws.com"],
+        ///         }],
+        ///     }],
+        /// });
+        /// const role = new aws.iam.Role("role", {
+        ///    assumeRolePolicy: lambdaRolePolicy.apply(lambdaRolePolicy =&gt; lambdaRolePolicy.json),
+        /// });
+        /// new aws.lambda.Function("function", {
+        ///     code: builder.asset,
+        ///     architectures: ["arm64"],
+        ///     handler: "bootstrap",
+        ///     role: role.arn,
+        ///     runtime: aws.lambda.Runtime.CustomAL2023,
+        /// });
+        /// ```
+        /// 
+        /// ```python
+        /// import pulumi
+        /// import pulumi_aws as aws
+        /// import pulumi_lambda_builders as lambda_builders
+        /// 
+        /// builder = lambda_builders.build_go(architecture="arm64",
+        ///     code="cmd/simple")
+        /// lambda_role_policy = aws.iam.get_policy_document_output(statements=[aws.iam.GetPolicyDocumentStatementArgs(
+        ///     actions=["sts:AssumeRole"],
+        ///     principals=[aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+        ///         type="Service",
+        ///         identifiers=["lambda.amazonaws.com"],
+        ///     )],
+        /// )])
+        /// role = aws.iam.Role("role", assume_role_policy=lambda_role_policy.json)
+        /// function = aws.lambda_.Function("function",
+        ///     code=builder.asset,
+        ///     architectures=["arm64"],
+        ///     handler="bootstrap",
+        ///     role=role.arn,
+        ///     runtime=aws.lambda_.Runtime.CUSTOM_AL2023)
+        /// ```
+        /// 
+        /// ```go
+        /// package main
+        /// 
+        /// import (
+        /// 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
+        /// 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
+        /// 	lambdabuilders "github.com/pulumi/pulumi-lambda-builders/sdk/go/lambda-builders"
+        /// 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+        /// )
+        /// 
+        /// func main() {
+        /// 	pulumi.Run(func(ctx *pulumi.Context) error {
+        /// 		builder, err := lambdabuilders.BuildGo(ctx, &amp;lambdabuilders.BuildGoArgs{
+        /// 			Architecture: pulumi.StringRef("arm64"),
+        /// 			Code:         pulumi.StringRef("cmd/simple"),
+        /// 		}, nil)
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		lambdaRolePolicy, err := iam.GetPolicyDocument(ctx, &amp;iam.GetPolicyDocumentArgs{
+        /// 			Statements: []iam.GetPolicyDocumentStatement{
+        /// 				{
+        /// 					Actions: []string{
+        /// 						"sts:AssumeRole",
+        /// 					},
+        /// 					Principals: []iam.GetPolicyDocumentStatementPrincipal{
+        /// 						{
+        /// 							Type: "Service",
+        /// 							Identifiers: []string{
+        /// 								"lambda.amazonaws.com",
+        /// 							},
+        /// 						},
+        /// 					},
+        /// 				},
+        /// 			},
+        /// 		}, nil)
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		role, err := iam.NewRole(ctx, "role", &amp;iam.RoleArgs{
+        /// 			AssumeRolePolicy: pulumi.String(lambdaRolePolicy.Json),
+        /// 		})
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		_, err = lambda.NewFunction(ctx, "function", &amp;lambda.FunctionArgs{
+        /// 			Code: builder.Asset,
+        /// 			Architectures: pulumi.StringArray{
+        /// 		pulumi.String("arm64"),
+        /// 	},
+        /// 			Handler: pulumi.String("bootstrap"),
+        /// 			Role:    role.Arn,
+        /// 			Runtime: pulumi.String(lambda.RuntimeCustomAL2023),
+        /// 		})
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		return nil
+        /// 	})
+        /// }
+        /// ```
+        /// 
+        /// ```csharp
+        /// using System.Collections.Generic;
+        /// using System.Linq;
+        /// using Pulumi;
+        /// using Aws = Pulumi.Aws;
+        /// using LambdaBuilders = Pulumi.LambdaBuilders;
+        /// 
+        /// return await Deployment.RunAsync(() =&gt; 
+        /// {
+        ///     var builder = LambdaBuilders.BuildGo.Invoke(new()
+        ///     {
+        ///         Architecture = "arm64",
+        ///         Code = "cmd/simple",
+        ///     });
+        /// 
+        ///     var lambdaRolePolicy = Aws.Iam.GetPolicyDocument.Invoke(new()
+        ///     {
+        ///         Statements = new[]
+        ///         {
+        ///             new Aws.Iam.Inputs.GetPolicyDocumentStatementInputArgs
+        ///             {
+        ///                 Actions = new[]
+        ///                 {
+        ///                     "sts:AssumeRole",
+        ///                 },
+        ///                 Principals = new[]
+        ///                 {
+        ///                     new Aws.Iam.Inputs.GetPolicyDocumentStatementPrincipalInputArgs
+        ///                     {
+        ///                         Type = "Service",
+        ///                         Identifiers = new[]
+        ///                         {
+        ///                             "lambda.amazonaws.com",
+        ///                         },
+        ///                     },
+        ///                 },
+        ///             },
+        ///         },
+        ///     });
+        /// 
+        ///     var role = new Aws.Iam.Role("role", new()
+        ///     {
+        ///         AssumeRolePolicy = lambdaRolePolicy.Apply(getPolicyDocumentResult =&gt; getPolicyDocumentResult.Json),
+        ///     });
+        /// 
+        ///     var function = new Aws.Lambda.Function("function", new()
+        ///     {
+        ///         Code = builder.Apply(buildGoResult =&gt; buildGoResult.Asset),
+        ///         Architectures = new[]
+        ///         {
+        ///             "arm64",
+        ///         },
+        ///         Handler = "bootstrap",
+        ///         Role = role.Arn,
+        ///         Runtime = Aws.Lambda.Runtime.CustomAL2023,
+        ///     });
+        /// 
+        /// });
+        /// ```
+        /// 
+        /// ```java
+        /// package generated_program;
+        /// 
+        /// import com.pulumi.Context;
+        /// import com.pulumi.Pulumi;
+        /// import com.pulumi.core.Output;
+        /// import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+        /// import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+        /// import com.pulumi.aws.iam.IamFunctions;
+        /// import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+        /// import com.pulumi.aws.iam.Role;
+        /// import com.pulumi.aws.iam.RoleArgs;
+        /// import com.pulumi.aws.lambda.Function;
+        /// import com.pulumi.aws.lambda.FunctionArgs;
+        /// import java.util.List;
+        /// import java.util.ArrayList;
+        /// import java.util.Map;
+        /// import java.io.File;
+        /// import java.nio.file.Files;
+        /// import java.nio.file.Paths;
+        /// 
+        /// public class App {
+        ///     public static void main(String[] args) {
+        ///         Pulumi.run(App::stack);
+        ///     }
+        /// 
+        ///     public static void stack(Context ctx) {
+        ///         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+        ///             .architecture("arm64")
+        ///             .code("cmd/simple")
+        ///             .build());
+        /// 
+        ///         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+        ///             .statements(GetPolicyDocumentStatementArgs.builder()
+        ///                 .actions("sts:AssumeRole")
+        ///                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+        ///                     .type("Service")
+        ///                     .identifiers("lambda.amazonaws.com")
+        ///                     .build())
+        ///                 .build())
+        ///             .build());
+        /// 
+        ///         var role = new Role("role", RoleArgs.builder()
+        ///             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -&gt; getPolicyDocumentResult.json()))
+        ///             .build());
+        /// 
+        ///         var function = new Function("function", FunctionArgs.builder()
+        ///             .code(buildGoResult.asset())
+        ///             .architectures("arm64")
+        ///             .handler("bootstrap")
+        ///             .role(role.arn())
+        ///             .runtime("provided.al2023")
+        ///             .build());
+        /// 
+        ///     }
+        /// }
+        /// ```
+        /// 
+        /// ```yaml
+        ///   role:
+        ///     type: aws:iam:Role
+        ///     properties:
+        ///       assumeRolePolicy: ${lambdaRolePolicy.json}
+        ///   function:
+        ///     type: aws:lambda:Function
+        ///     properties:
+        ///       code: ${builder.asset}
+        ///       architectures:
+        ///         - arm64
+        ///       handler: bootstrap
+        ///       role: ${role.arn}
+        ///       runtime: provided.al2023
+        /// variables:
+        ///   builder:
+        ///     fn::invoke:
+        ///       Function: lambda-builders:index:buildGo
+        ///       Arguments:
+        ///         architecture: arm64
+        ///         code: cmd/simple
+        ///   lambdaRolePolicy:
+        ///     fn::invoke:
+        ///       Function: aws:iam:getPolicyDocument
+        ///       Arguments:
+        ///         statements:
+        ///           - actions:
+        ///               - sts:AssumeRole
+        ///             principals:
+        ///               - type: Service
+        ///                 identifiers:
+        ///                   - lambda.amazonaws.com
+        /// ```
+        /// 
+        /// {{% /example %}}
+        /// {{% /examples %}}
+        /// </summary>
         public static Task<BuildGoResult> InvokeAsync(BuildGoArgs? args = null, InvokeOptions? options = null)
             => global::Pulumi.Deployment.Instance.InvokeAsync<BuildGoResult>("lambda-builders:index:buildGo", args ?? new BuildGoArgs(), options.WithDefaults());
 
+        /// <summary>
+        /// Builds a Golang Lambda Function into a Pulumi Asset that can be deployed.
+        /// 
+        /// The below example uses a folder structure like this:
+        /// ```tree
+        /// examples/simple-go
+        /// ├── Pulumi.yaml
+        /// ├── cmd
+        /// │   └── simple
+        /// │       └── main.go
+        /// ├── go.mod
+        /// ├── go.sum
+        /// └── main.go
+        /// ```
+        /// 
+        /// The output of `buildGo` produces an asset that can be passed to the
+        /// `aws.Lambda` `Code` property.
+        /// 
+        /// {{% examples %}}
+        /// 
+        /// ## Example Usage
+        /// 
+        /// {{% example %}}
+        /// 
+        /// Basic usage:
+        /// 
+        /// ```typescript
+        /// import * as pulumi from "@pulumi/pulumi";
+        /// import * as aws from "@pulumi/aws";
+        /// import * as lambda_builders from "@pulumi/lambda-builders";
+        /// 
+        /// const builder = lambda_builders.buildGo({
+        ///     architecture: "arm64",
+        ///     code: "cmd/simple",
+        /// });
+        /// const lambdaRolePolicy = aws.iam.getPolicyDocumentOutput({
+        ///     statements: [{
+        ///         actions: ["sts:AssumeRole"],
+        ///         principals: [{
+        ///             type: "Service",
+        ///             identifiers: ["lambda.amazonaws.com"],
+        ///         }],
+        ///     }],
+        /// });
+        /// const role = new aws.iam.Role("role", {
+        ///    assumeRolePolicy: lambdaRolePolicy.apply(lambdaRolePolicy =&gt; lambdaRolePolicy.json),
+        /// });
+        /// new aws.lambda.Function("function", {
+        ///     code: builder.asset,
+        ///     architectures: ["arm64"],
+        ///     handler: "bootstrap",
+        ///     role: role.arn,
+        ///     runtime: aws.lambda.Runtime.CustomAL2023,
+        /// });
+        /// ```
+        /// 
+        /// ```python
+        /// import pulumi
+        /// import pulumi_aws as aws
+        /// import pulumi_lambda_builders as lambda_builders
+        /// 
+        /// builder = lambda_builders.build_go(architecture="arm64",
+        ///     code="cmd/simple")
+        /// lambda_role_policy = aws.iam.get_policy_document_output(statements=[aws.iam.GetPolicyDocumentStatementArgs(
+        ///     actions=["sts:AssumeRole"],
+        ///     principals=[aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+        ///         type="Service",
+        ///         identifiers=["lambda.amazonaws.com"],
+        ///     )],
+        /// )])
+        /// role = aws.iam.Role("role", assume_role_policy=lambda_role_policy.json)
+        /// function = aws.lambda_.Function("function",
+        ///     code=builder.asset,
+        ///     architectures=["arm64"],
+        ///     handler="bootstrap",
+        ///     role=role.arn,
+        ///     runtime=aws.lambda_.Runtime.CUSTOM_AL2023)
+        /// ```
+        /// 
+        /// ```go
+        /// package main
+        /// 
+        /// import (
+        /// 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
+        /// 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
+        /// 	lambdabuilders "github.com/pulumi/pulumi-lambda-builders/sdk/go/lambda-builders"
+        /// 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+        /// )
+        /// 
+        /// func main() {
+        /// 	pulumi.Run(func(ctx *pulumi.Context) error {
+        /// 		builder, err := lambdabuilders.BuildGo(ctx, &amp;lambdabuilders.BuildGoArgs{
+        /// 			Architecture: pulumi.StringRef("arm64"),
+        /// 			Code:         pulumi.StringRef("cmd/simple"),
+        /// 		}, nil)
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		lambdaRolePolicy, err := iam.GetPolicyDocument(ctx, &amp;iam.GetPolicyDocumentArgs{
+        /// 			Statements: []iam.GetPolicyDocumentStatement{
+        /// 				{
+        /// 					Actions: []string{
+        /// 						"sts:AssumeRole",
+        /// 					},
+        /// 					Principals: []iam.GetPolicyDocumentStatementPrincipal{
+        /// 						{
+        /// 							Type: "Service",
+        /// 							Identifiers: []string{
+        /// 								"lambda.amazonaws.com",
+        /// 							},
+        /// 						},
+        /// 					},
+        /// 				},
+        /// 			},
+        /// 		}, nil)
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		role, err := iam.NewRole(ctx, "role", &amp;iam.RoleArgs{
+        /// 			AssumeRolePolicy: pulumi.String(lambdaRolePolicy.Json),
+        /// 		})
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		_, err = lambda.NewFunction(ctx, "function", &amp;lambda.FunctionArgs{
+        /// 			Code: builder.Asset,
+        /// 			Architectures: pulumi.StringArray{
+        /// 		pulumi.String("arm64"),
+        /// 	},
+        /// 			Handler: pulumi.String("bootstrap"),
+        /// 			Role:    role.Arn,
+        /// 			Runtime: pulumi.String(lambda.RuntimeCustomAL2023),
+        /// 		})
+        /// 		if err != nil {
+        /// 			return err
+        /// 		}
+        /// 		return nil
+        /// 	})
+        /// }
+        /// ```
+        /// 
+        /// ```csharp
+        /// using System.Collections.Generic;
+        /// using System.Linq;
+        /// using Pulumi;
+        /// using Aws = Pulumi.Aws;
+        /// using LambdaBuilders = Pulumi.LambdaBuilders;
+        /// 
+        /// return await Deployment.RunAsync(() =&gt; 
+        /// {
+        ///     var builder = LambdaBuilders.BuildGo.Invoke(new()
+        ///     {
+        ///         Architecture = "arm64",
+        ///         Code = "cmd/simple",
+        ///     });
+        /// 
+        ///     var lambdaRolePolicy = Aws.Iam.GetPolicyDocument.Invoke(new()
+        ///     {
+        ///         Statements = new[]
+        ///         {
+        ///             new Aws.Iam.Inputs.GetPolicyDocumentStatementInputArgs
+        ///             {
+        ///                 Actions = new[]
+        ///                 {
+        ///                     "sts:AssumeRole",
+        ///                 },
+        ///                 Principals = new[]
+        ///                 {
+        ///                     new Aws.Iam.Inputs.GetPolicyDocumentStatementPrincipalInputArgs
+        ///                     {
+        ///                         Type = "Service",
+        ///                         Identifiers = new[]
+        ///                         {
+        ///                             "lambda.amazonaws.com",
+        ///                         },
+        ///                     },
+        ///                 },
+        ///             },
+        ///         },
+        ///     });
+        /// 
+        ///     var role = new Aws.Iam.Role("role", new()
+        ///     {
+        ///         AssumeRolePolicy = lambdaRolePolicy.Apply(getPolicyDocumentResult =&gt; getPolicyDocumentResult.Json),
+        ///     });
+        /// 
+        ///     var function = new Aws.Lambda.Function("function", new()
+        ///     {
+        ///         Code = builder.Apply(buildGoResult =&gt; buildGoResult.Asset),
+        ///         Architectures = new[]
+        ///         {
+        ///             "arm64",
+        ///         },
+        ///         Handler = "bootstrap",
+        ///         Role = role.Arn,
+        ///         Runtime = Aws.Lambda.Runtime.CustomAL2023,
+        ///     });
+        /// 
+        /// });
+        /// ```
+        /// 
+        /// ```java
+        /// package generated_program;
+        /// 
+        /// import com.pulumi.Context;
+        /// import com.pulumi.Pulumi;
+        /// import com.pulumi.core.Output;
+        /// import com.pulumi.lambdabuilders.LambdabuildersFunctions;
+        /// import com.pulumi.lambdabuilders.inputs.BuildGoArgs;
+        /// import com.pulumi.aws.iam.IamFunctions;
+        /// import com.pulumi.aws.iam.inputs.GetPolicyDocumentArgs;
+        /// import com.pulumi.aws.iam.Role;
+        /// import com.pulumi.aws.iam.RoleArgs;
+        /// import com.pulumi.aws.lambda.Function;
+        /// import com.pulumi.aws.lambda.FunctionArgs;
+        /// import java.util.List;
+        /// import java.util.ArrayList;
+        /// import java.util.Map;
+        /// import java.io.File;
+        /// import java.nio.file.Files;
+        /// import java.nio.file.Paths;
+        /// 
+        /// public class App {
+        ///     public static void main(String[] args) {
+        ///         Pulumi.run(App::stack);
+        ///     }
+        /// 
+        ///     public static void stack(Context ctx) {
+        ///         final var builder = Lambda-buildersFunctions.buildGo(BuildGoArgs.builder()
+        ///             .architecture("arm64")
+        ///             .code("cmd/simple")
+        ///             .build());
+        /// 
+        ///         final var lambdaRolePolicy = IamFunctions.getPolicyDocument(GetPolicyDocumentArgs.builder()
+        ///             .statements(GetPolicyDocumentStatementArgs.builder()
+        ///                 .actions("sts:AssumeRole")
+        ///                 .principals(GetPolicyDocumentStatementPrincipalArgs.builder()
+        ///                     .type("Service")
+        ///                     .identifiers("lambda.amazonaws.com")
+        ///                     .build())
+        ///                 .build())
+        ///             .build());
+        /// 
+        ///         var role = new Role("role", RoleArgs.builder()
+        ///             .assumeRolePolicy(lambdaRolePolicy.applyValue(getPolicyDocumentResult -&gt; getPolicyDocumentResult.json()))
+        ///             .build());
+        /// 
+        ///         var function = new Function("function", FunctionArgs.builder()
+        ///             .code(buildGoResult.asset())
+        ///             .architectures("arm64")
+        ///             .handler("bootstrap")
+        ///             .role(role.arn())
+        ///             .runtime("provided.al2023")
+        ///             .build());
+        /// 
+        ///     }
+        /// }
+        /// ```
+        /// 
+        /// ```yaml
+        ///   role:
+        ///     type: aws:iam:Role
+        ///     properties:
+        ///       assumeRolePolicy: ${lambdaRolePolicy.json}
+        ///   function:
+        ///     type: aws:lambda:Function
+        ///     properties:
+        ///       code: ${builder.asset}
+        ///       architectures:
+        ///         - arm64
+        ///       handler: bootstrap
+        ///       role: ${role.arn}
+        ///       runtime: provided.al2023
+        /// variables:
+        ///   builder:
+        ///     fn::invoke:
+        ///       Function: lambda-builders:index:buildGo
+        ///       Arguments:
+        ///         architecture: arm64
+        ///         code: cmd/simple
+        ///   lambdaRolePolicy:
+        ///     fn::invoke:
+        ///       Function: aws:iam:getPolicyDocument
+        ///       Arguments:
+        ///         statements:
+        ///           - actions:
+        ///               - sts:AssumeRole
+        ///             principals:
+        ///               - type: Service
+        ///                 identifiers:
+        ///                   - lambda.amazonaws.com
+        /// ```
+        /// 
+        /// {{% /example %}}
+        /// {{% /examples %}}
+        /// </summary>
         public static Output<BuildGoResult> Invoke(BuildGoInvokeArgs? args = null, InvokeOptions? options = null)
             => global::Pulumi.Deployment.Instance.Invoke<BuildGoResult>("lambda-builders:index:buildGo", args ?? new BuildGoInvokeArgs(), options.WithDefaults());
     }
@@ -21,9 +613,15 @@ namespace Pulumi.LambdaBuilders
 
     public sealed class BuildGoArgs : global::Pulumi.InvokeArgs
     {
+        /// <summary>
+        /// Lambda function architecture to build for. Valid values are `"x86_64"` and `"arm64"`. Default is `"x86_64"`.
+        /// </summary>
         [Input("architecture")]
         public string? Architecture { get; set; }
 
+        /// <summary>
+        /// The path to the go code to build
+        /// </summary>
         [Input("code")]
         public string? Code { get; set; }
 
@@ -35,9 +633,15 @@ namespace Pulumi.LambdaBuilders
 
     public sealed class BuildGoInvokeArgs : global::Pulumi.InvokeArgs
     {
+        /// <summary>
+        /// Lambda function architecture to build for. Valid values are `"x86_64"` and `"arm64"`. Default is `"x86_64"`.
+        /// </summary>
         [Input("architecture")]
         public Input<string>? Architecture { get; set; }
 
+        /// <summary>
+        /// The path to the go code to build
+        /// </summary>
         [Input("code")]
         public Input<string>? Code { get; set; }
 
@@ -51,6 +655,9 @@ namespace Pulumi.LambdaBuilders
     [OutputType]
     public sealed class BuildGoResult
     {
+        /// <summary>
+        /// The archive that contains the golang binary that will be deployed to the Lambda Function.
+        /// </summary>
         public readonly Archive? Asset;
 
         [OutputConstructor]
