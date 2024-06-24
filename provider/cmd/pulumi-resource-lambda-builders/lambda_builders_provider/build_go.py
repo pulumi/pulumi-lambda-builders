@@ -18,8 +18,11 @@ from typing import Any, Optional
 import tempfile
 from aws_lambda_builders.builder import LambdaBuilder
 from pulumi.asset import FileArchive
-from pulumi.provider.provider import InvokeResult
-import sys
+from pulumi.provider.provider import CheckFailure, InvokeResult
+from aws_lambda_builders.exceptions import (
+    LambdaBuilderError,
+    UnsupportedArchitectureError,
+)
 
 
 class Architecture(Enum):
@@ -66,13 +69,26 @@ def build_go(args: BuildGoArgs) -> InvokeResult:
     if args.architecture != None:
         arch = args.architecture
 
-    builder.build(
-        source_dir=args.code,
-        artifacts_dir=tmp_dir,
-        scratch_dir=tempfile.gettempdir(),
-        manifest_path=os.path.join(args.code, "go.mod"),
-        runtime="provided",
-        architecture=arch,
-    )
+    try:
+        builder.build(
+            source_dir=args.code,
+            artifacts_dir=tmp_dir,
+            scratch_dir=tempfile.gettempdir(),
+            manifest_path=os.path.join(args.code, "go.mod"),
+            runtime="provided",
+            architecture=arch,
+        )
+    except UnsupportedArchitectureError as err:
+        print(err)
+        return InvokeResult(
+            outputs={},
+            failures=[CheckFailure(property="architecture", reason=err.__str__())],
+        )
+    # The only two input properties are code & architecture & lambda_builders only throws a specific
+    # error for architecture. The rest of the errors we can return as generic errors
+    except LambdaBuilderError as err:
+        return InvokeResult(
+            outputs={}, failures=[CheckFailure(property="", reason=err.__str__())]
+        )
 
     return InvokeResult(outputs={"asset": FileArchive(tmp_dir)})

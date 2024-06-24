@@ -24,6 +24,8 @@ codegen: .pulumi/bin/pulumi # Required by CI
 
 provider: build_provider # Required by CI
 test_provider: # Required by CI
+	cd provider/cmd/pulumi-resource-lambda-builders/lambda_builders_provider && \
+	../../../../bin/venv/bin/python -m unittest discover -v
 generate_schema: # Required by CI
 local_generate: generate # Required by CI
 
