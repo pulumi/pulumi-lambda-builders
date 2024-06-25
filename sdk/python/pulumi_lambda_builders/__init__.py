@@ -5,6 +5,7 @@
 from . import _utilities
 import typing
 # Export this package's modules as members:
+from .build_go import *
 from .provider import *
 _utilities.register(
     resource_modules="""

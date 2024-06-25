@@ -5,6 +5,11 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
 // Export members:
+export { BuildGoArgs, BuildGoResult, BuildGoOutputArgs } from "./buildGo";
+export const buildGo: typeof import("./buildGo").buildGo = null as any;
+export const buildGoOutput: typeof import("./buildGo").buildGoOutput = null as any;
+utilities.lazyLoad(exports, ["buildGo","buildGoOutput"], () => require("./buildGo"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;

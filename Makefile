@@ -24,6 +24,8 @@ codegen: .pulumi/bin/pulumi # Required by CI
 
 provider: build_provider # Required by CI
 test_provider: # Required by CI
+	cd provider/cmd/pulumi-resource-lambda-builders/lambda_builders_provider && \
+	../../../../bin/venv/bin/python -m unittest discover -v
 generate_schema: # Required by CI
 local_generate: generate # Required by CI
 
@@ -59,6 +61,7 @@ bin/venv:		${SRC}/requirements.txt
 
 bin/${PACK}-provider:	${SRC}/	${SRC}/${PACK_}_provider/VERSION
 	rm -rf $@
+	cp ${SCHEMA_PATH} ${SRC}/${PACK_}_provider/schema.json
 	./bin/venv/bin/python -m pip install --no-deps provider/cmd/pulumi-resource-${PACK}/ -t bin/ --upgrade
 
 bin/PulumiPlugin.yaml:			${SRC}/PulumiPlugin.yaml

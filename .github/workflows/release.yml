@@ -105,27 +105,18 @@ jobs:
           sdk/python/pyproject.toml
     - run: git status --porcelain
     - name: Tar provider binaries
-      run: tar -zcf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
-        github.workspace}}/bin/ pulumi-resource-${{ env.PROVIDER }}
-        pulumi-gen-${{ env.PROVIDER}}
+      run: tar -zcf ${{ github.workspace }}/provider.tar.gz -C ${{ github.workspace }}/bin/ .
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin/provider.tar.gz
+        path: ${{ github.workspace }}/provider.tar.gz
     - name: Test Provider Library
       run: make test_provider
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure in building provider prerequisites
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
   build_sdks:
     needs: prerequisites
     runs-on: pulumi-ubuntu-8core
@@ -187,13 +178,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}
     - name: UnTar provider binaries
-      run: tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
+      run: mkdir -p ${{ github.workspace}}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{
         github.workspace}}/bin
     - name: Restore Binary Permissions
-      run: find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print
-        -exec chmod +x {} \;
+      run: chmod +x bin/*
     - name: Generate SDK
       run: make generate_${{ matrix.language }}
     - name: Build SDK
@@ -215,13 +205,6 @@ jobs:
       with:
         name: ${{ matrix.language  }}-sdk.tar.gz
         path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure while building SDKs
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
   test:
     runs-on: pulumi-ubuntu-8core
     needs:
@@ -287,13 +270,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}
     - name: UnTar provider binaries
-      run: tar -zxf ${{ github.workspace }}/bin/provider.tar.gz -C ${{
+      run: mkdir -p ${{ github.workspace}}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{
         github.workspace}}/bin
     - name: Restore Binary Permissions
-      run: find ${{ github.workspace }} -name "pulumi-*-${{ env.PROVIDER }}" -print
-        -exec chmod +x {} \;
+      run: chmod +x bin/*
     - name: Download SDK
       uses: actions/download-artifact@v4
       with:
@@ -323,13 +305,6 @@ jobs:
         set -euo pipefail
 
         cd examples && go test -v -json -count=1 -cover -timeout 2h -tags=${{ matrix.language }} -parallel 4 . 2>&1 | tee /tmp/gotest.log | gotestfmt
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure in SDK tests
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
   publish:
     runs-on: ubuntu-latest
     needs: test
@@ -349,15 +324,6 @@ jobs:
       with:
         go-version: ${{ env.GOVERSION }}
         cache-dependency-path: "**/*.sum"
-    - name: Clear GitHub Actions Ubuntu runner disk space
-      uses: jlumbroso/free-disk-space@v1.3.1
-      with:
-        tool-cache: false
-        dotnet: false
-        android: true
-        haskell: true
-        swap-storage: true
-        large-packages: false
     - name: Install pulumictl
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
@@ -374,21 +340,23 @@ jobs:
         role-session-name: ${{ env.PROVIDER }}@githubActions
         role-external-id: upload-pulumi-release
         role-to-assume: ${{ secrets.AWS_UPLOAD_ROLE_ARN }}
-    # TODO: figure out publishing
-    # - name: Run GoReleaser
-    #   uses: goreleaser/goreleaser-action@v5
-    #   env:
-    #     GORELEASER_CURRENT_TAG: v${{ steps.version.outputs.version }}
-    #   with:
-    #     args: -p 3 release --clean --timeout 60m0s
-    #     version: latest
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
+    - name: Download provider binary
+      uses: actions/download-artifact@v4
       with:
-        author_name: Failure in publishing binaries
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
+        name: pulumi-${{ env.PROVIDER }}-provider.tar.gz
+        path: ${{ github.workspace }}
+    - name: Untar provider binaries
+      run: mkdir -p ${{ github.workspace }}/bin && tar -zxf ${{ github.workspace }}/provider.tar.gz -C ${{ github.workspace
+        }}/bin
+    - name: Restore binary perms
+      run: find ${{ github.workspace }}/bin -name "pulumi-*-${{ env.PROVIDER }}" -print
+        -exec chmod +x {} \;
+    - name: Test provider
+      run: make test_provider
+    - name: Create Provider Binaries
+      run: make dist
+    - name: Upload Provider Binaries
+      run: aws s3 cp dist s3://get.pulumi.com/releases/plugins/ --recursive
   publish_sdk:
     runs-on: ubuntu-latest
     needs: publish
@@ -464,13 +432,6 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         PYPI_PUBLISH_ARTIFACTS: all
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure in publishing SDK
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
   publish_java_sdk:
     runs-on: ubuntu-latest
     continue-on-error: true
