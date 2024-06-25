@@ -50,9 +50,9 @@ The output of `buildGo` produces an asset that can be passed to the
 ```typescript
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import * as lambda_builders from "@pulumi/lambda-builders";
+import * as lambdaBuilders from "@pulumi/lambda-builders";
 
-const builder = lambda_builders.buildGo({
+const builder = lambdaBuilders.buildGo({
     architecture: "arm64",
     code: "cmd/simple",
 });
