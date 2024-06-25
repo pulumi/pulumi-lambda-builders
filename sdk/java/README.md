@@ -1,5 +1,11 @@
 # Pulumi Lambda Builders
 
+---
+> [!NOTE]
+> Pulumi Lambda Builders is currently experimental
+
+---
+
 ## Background
 
 Pulumi Lambda Builders is a library that provides utilities for easily
