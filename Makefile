@@ -93,7 +93,7 @@ gen_dotnet_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/dotnet
 	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language dotnet --version ${VERSION_GENERIC}
 
-build_dotnet_sdk:: DOTNET_VERSION := ${VERSION}
+build_dotnet_sdk:: DOTNET_VERSION := ${VERSION_GENERIC}
 build_dotnet_sdk:: gen_dotnet_sdk
 	cd sdk/dotnet/ && \
 		echo "${DOTNET_VERSION}" >version.txt && \
@@ -112,7 +112,7 @@ build_dotnet: build_dotnet_sdk # Required by CI
 
 gen_nodejs_sdk: .pulumi/bin/pulumi
 	rm -rf sdk/nodejs
-	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language nodejs --version ${VERSION_GENERIC}
+	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language nodejs --version "${VERSION_GENERIC}"
 
 build_nodejs_sdk:: gen_nodejs_sdk
 	cd sdk/nodejs/ && \
@@ -135,7 +135,7 @@ gen_python_sdk: .pulumi/bin/pulumi
 	.pulumi/bin/pulumi package gen-sdk ${SCHEMA_PATH} --language python --version ${VERSION_GENERIC}
 	cp ${WORKING_DIR}/README.md sdk/python
 
-build_python_sdk:: PYPI_VERSION := ${VERSION}
+build_python_sdk:: PYPI_VERSION := ${VERSION_GENERIC}
 build_python_sdk:: gen_python_sdk
 	cd sdk/python/ && \
 		rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
@@ -164,10 +164,10 @@ install_java_sdk: # Required by CI
 dist::	build_provider
 	rm -rf dist
 	mkdir -p dist
-	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK}.cmd -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz .)
-	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-amd64.tar.gz
-	cp dist/pulumi-resource-${PACK}-v${VERSION}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION}-darwin-arm64.tar.gz
-	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION}-windows-amd64.tar.gz .)
+	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK}.cmd -cf ../dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-linux-amd64.tar.gz .)
+	cp dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-darwin-amd64.tar.gz
+	cp dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-linux-amd64.tar.gz dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-darwin-arm64.tar.gz
+	(cd bin && tar --gzip --exclude venv --exclude pulumi-resource-${PACK} -cf ../dist/pulumi-resource-${PACK}-v${VERSION_GENERIC}-windows-amd64.tar.gz .)
 
 # Pulumi for codegen
 .pulumi/bin/pulumi: PULUMI_VERSION := $(shell cat .pulumi.version)
