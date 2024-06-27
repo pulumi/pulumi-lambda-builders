@@ -47,11 +47,13 @@
             "packageReferences": {
                 "Pulumi": "3.*",
                 "Pulumi.Aws": "6.*"
-            }
+            },
+            "respectSchemaVersion": true
         },
         "go": {
             "generateResourceContainerTypes": true,
-            "importBasePath": "github.com/pulumi/pulumi-lambda-builders/sdk/go/lambda-builders"
+            "importBasePath": "github.com/pulumi/pulumi-lambda-builders/sdk/go/lambda-builders",
+            "respectSchemaVersion": true
         },
         "nodejs": {
             "dependencies": {
@@ -59,7 +61,8 @@
             },
             "devDependencies": {
                 "typescript": "^4.6.3"
-            }
+            },
+            "respectSchemaVersion": true
         },
         "java": {
             "basePackage": "",
@@ -70,13 +73,18 @@
                 "com.pulumi:pulumi": "0.9.9"
             },
             "gradleNexusPublishPluginVersion": "1.1.0",
-            "gradleTest": ""
+            "gradleTest": "",
+            "respectSchemaVersion": true
         },
         "python": {
+            "pyproject": {
+                "enabled": true
+            },
             "requires": {
-                "pulumi": ">=3.0.0,<4.0.0",
-                "pulumi-aws": ">=6.0.0,<7.0.0"
-            }
+                "pulumi": "\u003e=3.0.0,\u003c4.0.0",
+                "pulumi-aws": "\u003e=6.0.0,\u003c7.0.0"
+            },
+            "respectSchemaVersion": true
         }
     }
 }
