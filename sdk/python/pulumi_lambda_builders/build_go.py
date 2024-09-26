@@ -4,9 +4,14 @@
 
 import copy
 import warnings
+import sys
 import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union, overload
+if sys.version_info >= (3, 11):
+    from typing import NotRequired, TypedDict, TypeAlias
+else:
+    from typing_extensions import NotRequired, TypedDict, TypeAlias
 from . import _utilities
 
 __all__ = [
@@ -91,9 +96,6 @@ def build_go(architecture: Optional[str] = None,
 
     return AwaitableBuildGoResult(
         asset=pulumi.get(__ret__, 'asset'))
-
-
-@_utilities.lift_output_func(build_go)
 def build_go_output(architecture: Optional[pulumi.Input[Optional[str]]] = None,
                     code: Optional[pulumi.Input[Optional[str]]] = None,
                     opts: Optional[pulumi.InvokeOptions] = None) -> pulumi.Output[BuildGoResult]:
@@ -136,4 +138,10 @@ def build_go_output(architecture: Optional[pulumi.Input[Optional[str]]] = None,
     :param str architecture: Lambda function architecture to build for. Valid values are `"x86_64"` and `"arm64"`. Default is `"x86_64"`.
     :param str code: The path to the go code to build
     """
-    ...
+    __args__ = dict()
+    __args__['architecture'] = architecture
+    __args__['code'] = code
+    opts = pulumi.InvokeOptions.merge(_utilities.get_invoke_opts_defaults(), opts)
+    __ret__ = pulumi.runtime.invoke_output('lambda-builders:index:buildGo', __args__, opts=opts, typ=BuildGoResult)
+    return __ret__.apply(lambda __response__: BuildGoResult(
+        asset=pulumi.get(__response__, 'asset')))
