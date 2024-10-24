@@ -1,10 +1,10 @@
 [project]
   name = "pulumi_lambda_builders"
   description = "Utilities for building AWS Lambda Functions"
-  dependencies = ["parver>=0.2.1", "pulumi>=3.0.0,<4.0.0", "pulumi-aws>=6.0.0,<7.0.0", "semver>=2.8.1"]
+  dependencies = ["parver>=0.2.1", "pulumi>=3.0.0,<4.0.0", "pulumi-aws>=6.0.0,<7.0.0", "semver>=2.8.1", "typing-extensions>=4.11; python_version < \"3.11\""]
   readme = "README.md"
   requires-python = ">=3.8"
-  version = "1.0.0a0+dev"
+  version = "0.2.0a1719503919+e0ef35f"
   [project.license]
     text = "Apache-2.0"
   [project.urls]
