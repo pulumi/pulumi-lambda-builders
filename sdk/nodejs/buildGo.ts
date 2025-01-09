@@ -48,7 +48,6 @@ import * as utilities from "./utilities";
  */
 export function buildGo(args?: BuildGoArgs, opts?: pulumi.InvokeOptions): Promise<BuildGoResult> {
     args = args || {};
-
     opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts || {});
     return pulumi.runtime.invoke("lambda-builders:index:buildGo", {
         "architecture": args.architecture,
@@ -115,8 +114,13 @@ export interface BuildGoResult {
  * });
  * ```
  */
-export function buildGoOutput(args?: BuildGoOutputArgs, opts?: pulumi.InvokeOptions): pulumi.Output<BuildGoResult> {
-    return pulumi.output(args).apply((a: any) => buildGo(a, opts))
+export function buildGoOutput(args?: BuildGoOutputArgs, opts?: pulumi.InvokeOutputOptions): pulumi.Output<BuildGoResult> {
+    args = args || {};
+    opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts || {});
+    return pulumi.runtime.invokeOutput("lambda-builders:index:buildGo", {
+        "architecture": args.architecture,
+        "code": args.code,
+    }, opts);
 }
 
 export interface BuildGoOutputArgs {
