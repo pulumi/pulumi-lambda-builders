@@ -109,15 +109,11 @@ type BuildGoResult struct {
 }
 
 func BuildGoOutput(ctx *pulumi.Context, args BuildGoOutputArgs, opts ...pulumi.InvokeOption) BuildGoResultOutput {
-	return pulumi.ToOutputWithContext(context.Background(), args).
-		ApplyT(func(v interface{}) (BuildGoResult, error) {
+	return pulumi.ToOutputWithContext(ctx.Context(), args).
+		ApplyT(func(v interface{}) (BuildGoResultOutput, error) {
 			args := v.(BuildGoArgs)
-			r, err := BuildGo(ctx, &args, opts...)
-			var s BuildGoResult
-			if r != nil {
-				s = *r
-			}
-			return s, err
+			options := pulumi.InvokeOutputOptions{InvokeOptions: internal.PkgInvokeDefaultOpts(opts)}
+			return ctx.InvokeOutput("lambda-builders:index:buildGo", args, BuildGoResultOutput{}, options).(BuildGoResultOutput), nil
 		}).(BuildGoResultOutput)
 }
 
