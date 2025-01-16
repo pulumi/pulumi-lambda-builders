@@ -43,7 +43,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Install Go
@@ -56,7 +56,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - if: github.event_name == 'pull_request'
       name: Install Schema Tools
       uses: jaxxstorm/action-install-gh-release@v1.11.0
@@ -137,7 +137,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Install Go
@@ -150,7 +150,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
@@ -229,7 +229,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Install Go
@@ -242,7 +242,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
@@ -325,7 +325,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Install Go
@@ -338,7 +338,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -377,7 +377,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Checkout Scripts Repo
@@ -396,7 +396,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
@@ -453,7 +453,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Install Go
@@ -466,7 +466,7 @@ jobs:
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
-      uses: pulumi/actions@v5
+      uses: pulumi/actions@cd99a7f8865434dd3532b586a26f9ebea596894f # v5
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -504,7 +504,7 @@ jobs:
         lfs: true
     - id: version
       name: Set Provider Version
-      uses: pulumi/provider-version-action@v1
+      uses: pulumi/provider-version-action@7c54f136703646f7d6eaa3d3b3c877e5a805d6ab # v1
       with:
         set-env: PROVIDER_VERSION
     - name: Download go SDK
